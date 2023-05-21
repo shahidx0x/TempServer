@@ -296,9 +296,9 @@ client.connect((err) => {
               total_amount: 1000 || req.params.am,
               currency: "BDT",
               tran_id: "REF123",
-              success_url: `http://localhost:4000/ssl-payment-success-doc/${req.params.id}`,
-              fail_url: `http://localhost:4000/ssl-payment-fail`,
-              cancel_url: `http://localhost:4000/ssl-payment-cancel`,
+              success_url: `https://api-sastho-seba.onrender.com/ssl-payment-success-doc/${req.params.id}`,
+              fail_url: `https://api-sastho-seba.onrender.com/ssl-payment-fail`,
+              cancel_url: `https://api-sastho-seba.onrender.com/ssl-payment-cancel`,
               shipping_method: "No",
               product_name: "Computer.",
               product_category: "Electronic",
@@ -318,15 +318,15 @@ client.connect((err) => {
               value_b: "ref002_B",
               value_c: "ref003_C",
               value_d: "ref004_D",
-              ipn_url: `http://localhost:4000/ssl-payment-notification`,
+              ipn_url: `https://api-sastho-seba.onrender.com/ssl-payment-notification`,
             })
           : (data = {
               total_amount:1000 || req.params.am,
               currency: "BDT",
               tran_id: "REF123",
-              success_url: `http://localhost:4000/ssl-payment-success`,
-              fail_url: `http://localhost:4000/ssl-payment-fail`,
-              cancel_url: `http://localhost:4000/ssl-payment-cancel`,
+              success_url: `https://api-sastho-seba.onrender.com/ssl-payment-success`,
+              fail_url: `https://api-sastho-seba.onrender.com/ssl-payment-fail`,
+              cancel_url: `https://api-sastho-seba.onrender.com/ssl-payment-cancel`,
               shipping_method: "No",
               product_name: "Computer.",
               product_category: "Electronic",
@@ -346,7 +346,7 @@ client.connect((err) => {
               value_b: "ref002_B",
               value_c: "ref003_C",
               value_d: "ref004_D",
-              ipn_url: `http://localhost:4000/ssl-payment-notification`,
+              ipn_url: `https://api-sastho-seba.onrender.com/ssl-payment-notification`,
             });
 
         const sslcommerz = new SSLCommerzPayment(store_id, store_passwd, false);
@@ -376,13 +376,13 @@ client.connect((err) => {
       app.post("/ssl-payment-success", async (req, res) => {
         return res
           .status(200)
-          .redirect("http://localhost:3000/payment-success");
+          .redirect("https://sasthoseba.netlify.app/payment-success");
       });
       app.post("/ssl-payment-success-doc/:id", async (req, res) => {
-        axios.put(`http://localhost:4000/users-info/${req.params.id}`,{apstatus:"Paid"})
+        axios.put(`https://api-sastho-seba.onrender.com/users-info/${req.params.id}`,{apstatus:"Paid"})
         res
           .status(200)
-          .redirect("http://localhost:3000/payment-success-doc");
+          .redirect("https://sasthoseba.netlify.app/payment-success-doc");
         
       });
 
