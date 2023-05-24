@@ -14,6 +14,9 @@ const router = express.Router();
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
 const nodemailer = require("nodemailer");
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -23,6 +26,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 app.post('/send-email', (req, res) => {
+  console.log(req.body.mail);
   const mailOptions = {
     from: process.env.GMAIL_USER, // Sender address
     to: req.body.mail, // Recipient address
@@ -49,8 +53,7 @@ admin.initializeApp({
 
 //MIDDLEWARE SETUP
 
-app.use(cors());
-app.use(express.json());
+
 
 // SERVER STATUS
 
