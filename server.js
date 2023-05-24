@@ -13,7 +13,7 @@ const is_live = false;
 require("dotenv").config();
 const router = express.Router();
 const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
+// const serviceAccount = require("./serviceAccountKey.json");
 const nodemailer = require("nodemailer");
 app.use(cors());
 app.use(bodyParser.json());
@@ -48,9 +48,9 @@ app.post('/send-email', (req, res) => {
 })
 
 // Intialize the firebase-admin project/account
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
 
 //MIDDLEWARE SETUP
 
