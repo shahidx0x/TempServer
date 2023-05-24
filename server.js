@@ -13,6 +13,34 @@ require("dotenv").config();
 const router = express.Router();
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // Replace with your Gmail email address
+    pass: process.env.GMAIL_PASS // Replace with your Gmail password or app-specific password
+  }
+});
+app.post('/send-email', (req, res) => {
+  const mailOptions = {
+    from: process.env.GMAIL_USER, // Sender address
+    to: req.body.mail, // Recipient address
+    subject: 'Doctor Registration Request', // Subject line
+    html: '<h1>This is a test email sent using Nodemailer and Express!</h1>' // Email content
+  };
+
+  // Sending the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      res.send('Error sending email');
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.send('Email sent successfully');
+    }
+  });
+})
 
 // Intialize the firebase-admin project/account
 admin.initializeApp({
