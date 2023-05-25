@@ -67,7 +67,7 @@ app.listen(port, () => {
 
 //MONGODB CONNECTION AND CONFIGUREING API
 
-const uri = `mongodb+srv://practice:ISlz3WEfWEIrIGjT@cluster0.wzlrk.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = process.env.URI;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
