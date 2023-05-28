@@ -77,7 +77,7 @@ client.connect((err) => {
       });
 
       app.post("/send-email", (req, res) => {
-        const { name, degree, speciality, visit_houre, chember, sel_area, fee, exp, bmdc_num, car_no, drv_nid, drv_def_loc, drv_cont, store_loc, store_cont,reg_count } = req.body;
+        const { name, degree, speciality, visit_houre, chember, sel_area, fee, exp, bmdc_num, car_no, drv_nid, drv_def_loc, drv_cont, store_loc, store_cont,reg_count,reg_mail } = req.body;
         let doc_html = `
         <!DOCTYPE html>
         <html>
@@ -88,7 +88,7 @@ client.connect((err) => {
         <p>Registration request from user ${req.body.mail}</p>
           <h1>Information</h1>
           <p>Name : ${name || ""}</p>
-          <p>Email : ${req.body.mail || ""}</p>
+          <p>Email : ${reg_mail || ""}</p>
           <p>Degree : ${degree || ""}</p>
           <p>Speciality : ${speciality || ""}</p>
           <p>Visiting Hours : ${visit_houre || ""}</p>
@@ -110,7 +110,7 @@ client.connect((err) => {
         <p>Registration request from user ${req.body.mail}</p>
           <h1>Information</h1>
           <p>Name : ${name || ""}</p>
-          <p>Email : ${req.body.mail || ""}</p>
+          <p>Email : ${reg_mail || ""}</p>
           <p>Car Number : ${car_no || ""}</p>
           <p>Driver NID : ${drv_nid || ""}</p>
           <p>Driver Default Location : ${drv_def_loc || ""}</p>
@@ -128,7 +128,7 @@ client.connect((err) => {
         <p>Registration request from user ${req.body.mail}</p>
           <h1>Information</h1>
           <p>Name : ${name || ""}</p>
-          <p>Email : ${req.body.mail || ""}</p>
+          <p>Email : ${reg_mail || ""}</p>
           <p>Store Location : ${store_loc || ""}</p>
           <p>Store Contact : ${store_cont || ""}</p>
         </body>
