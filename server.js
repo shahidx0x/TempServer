@@ -68,6 +68,54 @@ client.connect((err) => {
       const haiku10 = database.collection("carts");
       const haiku11 = database.collection("payment-history");
 
+      
+      const haiku12 = database.collection("ambulence-user-data");
+      const haiku13 = database.collection("ambulence-reserved-data");
+      const haiku14 = database.collection("store-user-data");
+      const haiku15 = database.collection("store-reserved-data");
+
+
+      app.get("/am/usr/data", async (req, res) => {
+        res.send(await haiku12.find({}).toArray());
+      });
+      app.post("/am/usr/data", async (req, res) => {
+        res.json(await haiku12.insertOne(req.body));
+      });
+      app.delete("/am/usr/data/:id", async (req, res) => {
+        res.json(await haiku12.deleteOne({ _id: ObjectId(req.params.id) }));
+      });
+
+      app.get("/am/rsv/data", async (req, res) => {
+        res.send(await haiku13.find({}).toArray());
+      });
+      app.post("/am/rsv/data", async (req, res) => {
+        res.json(await haiku13.insertOne(req.body));
+      });
+      app.delete("/am/rsv/data/:id", async (req, res) => {
+        res.json(await haiku13.deleteOne({ _id: ObjectId(req.params.id) }));
+      });
+
+      app.get("/str/usr/data", async (req, res) => {
+        res.send(await haiku14.find({}).toArray());
+      });
+      app.post("/str/usr/data", async (req, res) => {
+        res.json(await haiku14.insertOne(req.body));
+      });
+      app.delete("/str/usr/data/:id", async (req, res) => {
+        res.json(await haiku14.deleteOne({ _id: ObjectId(req.params.id) }));
+      });
+
+      app.get("/str/rsv/data", async (req, res) => {
+        res.send(await haiku15.find({}).toArray());
+      });
+      app.post("/str/rsv/data", async (req, res) => {
+        res.json(await haiku15.insertOne(req.body));
+      });
+      app.delete("/str/rsv/data/:id", async (req, res) => {
+        res.json(await haiku15.deleteOne({ _id: ObjectId(req.params.id) }));
+      });
+
+
       const transporter = nodemailer.createTransport({
         service: "outlook",
         auth: {
@@ -85,7 +133,7 @@ client.connect((err) => {
           <title>${req.body.reg_type}</title>
         </head>
         <body>
-        <p>Registration request from user ${req.body.mail}</p>
+        <p>Registration request from user ${reg_mail}</p>
           <h1>Information</h1>
           <p>Name : ${name || ""}</p>
           <p>Email : ${reg_mail || ""}</p>
