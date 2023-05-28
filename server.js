@@ -9,6 +9,7 @@ const bodyParser = require("body-parser");
 const SSLCommerzPayment = require("sslcommerz-lts");
 const store_id = "shahi63e5ab1ce27e1";
 const store_passwd = "shahi63e5ab1ce27e1@ssl";
+
 const is_live = false;
 require("dotenv").config();
 const router = express.Router();
@@ -19,42 +20,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER, // Replace with your Gmail email address
-    pass: process.env.GMAIL_PASS // Replace with your Gmail password or app-specific password
-  }
-});
-app.post('/send-email', (req, res) => {
-  console.log(req.body.mail);
-  const mailOptions = {
-    from: process.env.GMAIL_USER, // Sender address
-    to: req.body.mail, // Recipient address
-    subject: 'Doctor Registration Request', // Subject line
-    html: '<h1>This is a test email sent using Nodemailer and Express!</h1>' // Email content
-  };
-
-  // Sending the email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log(error);
-      res.send('Error sending email');
-    } else {
-      console.log('Email sent: ' + info.response);
-      res.send('Email sent successfully');
-    }
-  });
-})
-
 // Intialize the firebase-admin project/account
 // admin.initializeApp({
 //   credential: admin.credential.cert(serviceAccount),
 // });
 
 //MIDDLEWARE SETUP
-
-
 
 // SERVER STATUS
 
@@ -97,6 +68,92 @@ client.connect((err) => {
       const haiku10 = database.collection("carts");
       const haiku11 = database.collection("payment-history");
 
+      const transporter = nodemailer.createTransport({
+        service: "outlook",
+        auth: {
+          user: process.env.OUT_USER,
+          pass: process.env.OUT_PASS,
+        },
+      });
+
+      app.post("/send-email", (req, res) => {
+        const { name, degree, speciality, visit_houre, chember, sel_area, fee, exp, bmdc_num, car_no, drv_nid, drv_def_loc, drv_cont, store_loc, store_cont,reg_count } = req.body;
+        let doc_html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${req.body.reg_type}</title>
+        </head>
+        <body>
+        <p>Registration request from user ${req.body.mail}</p>
+          <h1>Information</h1>
+          <p>Name : ${name || ""}</p>
+          <p>Email : ${req.body.mail || ""}</p>
+          <p>Degree : ${degree || ""}</p>
+          <p>Speciality : ${speciality || ""}</p>
+          <p>Visiting Hours : ${visit_houre || ""}</p>
+          <p>Chamber : ${chember || ""}</p>
+          <p>Selected Area : ${sel_area || ""}</p>
+          <p>Fees : ${fee || ""}</p>
+          <p>Experience : ${exp || ""}</p>
+          <p>BMDC Number : ${bmdc_num || ""}</p>
+        </body>
+        </html> 
+        ` 
+        let amb_html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${req.body.reg_type}</title>
+        </head>
+        <body>
+        <p>Registration request from user ${req.body.mail}</p>
+          <h1>Information</h1>
+          <p>Name : ${name || ""}</p>
+          <p>Email : ${req.body.mail || ""}</p>
+          <p>Car Number : ${car_no || ""}</p>
+          <p>Driver NID : ${drv_nid || ""}</p>
+          <p>Driver Default Location : ${drv_def_loc || ""}</p>
+          <p>Driver Contact : ${drv_cont || ""}</p>
+        </body>
+        </html>`
+
+        let store_html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${req.body.reg_type}</title>
+        </head>
+        <body>
+        <p>Registration request from user ${req.body.mail}</p>
+          <h1>Information</h1>
+          <p>Name : ${name || ""}</p>
+          <p>Email : ${req.body.mail || ""}</p>
+          <p>Store Location : ${store_loc || ""}</p>
+          <p>Store Contact : ${store_cont || ""}</p>
+        </body>
+        </html>
+        `
+        let final_html = reg_count === 0 ? doc_html : reg_count === 1 ? amb_html : store_html;
+        const mailOptions = {
+          from: process.env.OUT_USER,
+          to: req.body.mail,
+          subject: req.body.reg_type,
+          html: final_html,
+        };
+
+        // Sending the email
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.log(error);
+            res.send("Error sending email");
+          } else {
+            console.log("Email sent: " + info.response);
+            res.send("Email sent successfully");
+          }
+        });
+      });
+
       app.delete("/delete/firebase/account/:mail", async (req, res) => {
         const email = req.params.mail;
         try {
@@ -112,6 +169,7 @@ client.connect((err) => {
       app.get("/users", async (req, res) => {
         res.send(await haiku5.find({}).toArray());
       });
+
       app.get("/users/:email", async (req, res) => {
         const user = await haiku5.findOne({ email: req.params.email });
         let isAdmin = false;
@@ -127,6 +185,7 @@ client.connect((err) => {
       app.post("/users", async (req, res) => {
         res.json(await haiku5.insertOne(req.body));
       });
+
       app.put("/users/:email", async (req, res) => {
         const result = await haiku5.updateOne(
           { email: req.params.email },
@@ -134,13 +193,15 @@ client.connect((err) => {
         );
         res.send(result);
       });
-        app.put("/users/make/:email", async (req, res) => {
-           const result = await haiku5.updateOne(
-             { email: req.params.email },
-             { $set: { role: "user" } }
-           );
-           res.send(result);
-         });
+
+      app.put("/users/make/:email", async (req, res) => {
+        const result = await haiku5.updateOne(
+          { email: req.params.email },
+          { $set: { role: "user" } }
+        );
+        res.send(result);
+      });
+
       app.delete("/users/:id", async (req, res) => {
         res.json(await haiku5.deleteOne({ _id: ObjectId(req.params.id) }));
       });
@@ -150,9 +211,11 @@ client.connect((err) => {
       app.get("/reg-user-info", async (req, res) => {
         res.send(await haiku8.find({}).toArray());
       });
+
       app.post("/reg-user-info", async (req, res) => {
         res.json(await haiku8.insertOne(req.body));
       });
+
       app.delete("/reg-user-info/:id", async (req, res) => {
         res.json(await haiku8.deleteOne({ _id: ObjectId(req.params.id) }));
       });
@@ -162,6 +225,7 @@ client.connect((err) => {
       app.get("/pres-info", async (req, res) => {
         res.send(await haiku7.find({}).toArray());
       });
+
       app.post("/pres-info", async (req, res) => {
         res.json(await haiku7.insertOne(req.body));
       });
@@ -171,12 +235,15 @@ client.connect((err) => {
       app.get("/pres-img", async (req, res) => {
         res.send(await haiku6.find({}).toArray());
       });
+
       app.get("/pres-img/:email", async (req, res) => {
         res.json(await haiku6.findOne({ owner: req.params.email }));
       });
+
       app.post("/pres-img", async (req, res) => {
         res.json(await haiku6.insertOne(req.body));
       });
+
       app.delete("/pres-img/:id", async (req, res) => {
         res.json(await haiku6.deleteOne({ _id: ObjectId(req.params.id) }));
       });
@@ -233,6 +300,7 @@ client.connect((err) => {
       app.delete("/doctorlist/:id", async (req, res) => {
         res.json(await haiku3.deleteOne({ _id: ObjectId(req.params.id) }));
       });
+
       app.delete("/doctorlist/delete/all", async (req, res) => {
         res.json(await haiku3.deleteMany({}));
       });
@@ -241,33 +309,42 @@ client.connect((err) => {
       app.get("/medicine", async (req, res) => {
         res.send(await haiku9.find({}).toArray());
       });
+
       app.post("/add/medicine", async (req, res) => {
         res.json(await haiku9.insertOne(req.body));
       });
+
       app.get("/medicine/:id", async (req, res) => {
         res.json(await haiku9.findOne({ _id: ObjectId(req.params.id) }));
       });
+
       app.delete("/medicine/:id", async (req, res) => {
         res.json(await haiku9.deleteOne({ _id: ObjectId(req.params.id) }));
       });
+
       //GET,POST,DEL For Medicine
       app.get("/carts", async (req, res) => {
         res.send(await haiku10.find({}).toArray());
       });
+
       app.get("/carts/email/:mail", async (req, res) => {
         res.send(
           await haiku10.find({ "payload.email": req.params.mail }).toArray()
         );
       });
+
       app.post("/add/carts", async (req, res) => {
         res.json(await haiku10.insertOne(req.body));
       });
+
       app.get("/carts/:id", async (req, res) => {
         res.json(await haiku10.findOne({ _id: ObjectId(req.params.id) }));
       });
+
       app.delete("/carts/:id", async (req, res) => {
         res.json(await haiku10.deleteOne({ _id: ObjectId(req.params.id) }));
       });
+
       app.delete("/carts/clear/:mail", async (req, res) => {
         try {
           const result = await haiku10.deleteMany({
@@ -279,13 +356,16 @@ client.connect((err) => {
           res.status(500).json({ message: "Error deleting documents" });
         }
       });
+
       app.delete("/carts/delete/all", async (req, res) => {
         res.json(await haiku10.deleteMany({}));
       });
+
       //GET,POST,DEL For Medicine
       app.get("/payment-history", async (req, res) => {
         res.send(await haiku11.find({}).toArray());
       });
+
       app.get("/payment-history/:mail", async (req, res) => {
         const result = await haiku11
           .aggregate([
@@ -303,18 +383,23 @@ client.connect((err) => {
 
         res.json(result);
       });
+
       app.post("/add/payment-history", async (req, res) => {
         res.json(await haiku11.insertMany(req.body));
       });
+
       app.get("/payment-history/:id", async (req, res) => {
         res.json(await haiku11.findOne({ _id: ObjectId(req.params.id) }));
       });
+
       app.delete("/payment-history/:id", async (req, res) => {
         res.json(await haiku11.deleteOne({ _id: ObjectId(req.params.id) }));
       });
+
       app.delete("/payment-history/delete/all", async (req, res) => {
         res.json(await haiku11.deleteMany({}));
       });
+
       //SSL-PAYMENT
       app.get("/payment/:id/:am/:cus/:mail/:status", async (req, res) => {
         console.log(req.params);
@@ -353,7 +438,7 @@ client.connect((err) => {
               ipn_url: `https://api-sastho-seba.onrender.com/ssl-payment-notification`,
             })
           : (data = {
-              total_amount:1000 || req.params.am,
+              total_amount: 1000 || req.params.am,
               currency: "BDT",
               tran_id: "REF123",
               success_url: `https://api-sastho-seba.onrender.com/ssl-payment-success`,
@@ -410,12 +495,15 @@ client.connect((err) => {
           .status(200)
           .redirect("https://sasthoseba.netlify.app/payment-success");
       });
+
       app.post("/ssl-payment-success-doc/:id", async (req, res) => {
-        axios.put(`https://api-sastho-seba.onrender.com/users-info/${req.params.id}`,{apstatus:"Paid"})
+        axios.put(
+          `https://api-sastho-seba.onrender.com/users-info/${req.params.id}`,
+          { apstatus: "Paid" }
+        );
         res
           .status(200)
           .redirect("https://sasthoseba.netlify.app/payment-success-doc");
-        
       });
 
       app.post("/ssl-payment-fail", async (req, res) => {
