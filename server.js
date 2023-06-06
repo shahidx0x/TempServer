@@ -14,16 +14,21 @@ const is_live = false;
 require("dotenv").config();
 const router = express.Router();
 const admin = require("firebase-admin");
-// const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("./serviceAccountKey.json");
 const nodemailer = require("nodemailer");
+
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Intialize the firebase-admin project/account
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+
 
 //MIDDLEWARE SETUP
 
@@ -75,6 +80,24 @@ client.connect((err) => {
       const haiku15 = database.collection("store-reserved-data");
 
 
+      app.post("/firebase", (req, res) => {
+        const { email, password } = req.body;
+      
+        admin
+          .auth()
+          .createUser({
+            email: email,
+            password: password,
+          })
+          .then((userRecord) => {
+            res.status(200).json({ message: 'User created successfully', uid: userRecord.uid });
+          })
+          .catch((error) => {
+            console.error('Error creating user:', error);
+            res.status(500).json({ error: 'Failed to create user' });
+          });
+      });
+
       app.get("/am/usr/data", async (req, res) => {
         res.send(await haiku12.find({}).toArray());
       });
@@ -83,6 +106,9 @@ client.connect((err) => {
       });
       app.delete("/am/usr/data/:id", async (req, res) => {
         res.json(await haiku12.deleteOne({ _id: ObjectId(req.params.id) }));
+      });
+      app.delete("/am/delete/all", async (req, res) => {
+        res.json(await haiku12.deleteMany({}));
       });
 
       app.get("/am/rsv/data", async (req, res) => {
@@ -222,12 +248,20 @@ client.connect((err) => {
         const user = await haiku5.findOne({ email: req.params.email });
         let isAdmin = false;
         let isDoctor = false;
+        let isAmb = false;
+        let isStore = false;
+
         if (user?.role === "admin") {
           isAdmin = true;
         } else if (user?.role === "doctor") {
           isDoctor = true;
+        } else if (user?.role === "ambulence") {
+          isAmb = true;
+        } else if (user?.role === "store") {
+          isStore = true;
         }
-        res.json({ admin: isAdmin, doctor: isDoctor });
+        
+        res.json({ admin: isAdmin, doctor: isDoctor,ambulence:isAmb,store:isStore });
       });
 
       app.post("/users", async (req, res) => {
@@ -450,7 +484,7 @@ client.connect((err) => {
 
       //SSL-PAYMENT
       app.get("/payment/:id/:am/:cus/:mail/:status", async (req, res) => {
-        console.log(req.params);
+        console.log(req.body);
         /**
          * Create ssl session request
          */
@@ -484,7 +518,34 @@ client.connect((err) => {
               value_c: "ref003_C",
               value_d: "ref004_D",
               ipn_url: `https://api-sastho-seba.onrender.com/ssl-payment-notification`,
-            })
+            }): status === "amb" ? ((data = {
+              total_amount: 200 || req.params.am,
+              currency: "BDT",
+              tran_id: "REF123",
+              success_url: `https://api-sastho-seba.onrender.com/amb-payment-success`,
+              fail_url: `https://api-sastho-seba.onrender.com/ssl-payment-fail`,
+              cancel_url: `https://api-sastho-seba.onrender.com/ssl-payment-cancel`,
+              shipping_method: "No",
+              product_name: "Computer.",
+              product_category: "Electronic",
+              product_profile: "general",
+              cus_name: req.params.cus,
+              cus_email: req.params.mail,
+              cus_add1: "Dhaka",
+              cus_add2: "Dhaka",
+              cus_city: "Dhaka",
+              cus_state: "Dhaka",
+              cus_postcode: "1000",
+              cus_country: "Bangladesh",
+              cus_phone: "01711111111",
+              cus_fax: "01711111111",
+              multi_card_name: "mastercard",
+              value_a: "ref001_A",
+              value_b: "ref002_B",
+              value_c: "ref003_C",
+              value_d: "ref004_D",
+              ipn_url: `https://api-sastho-seba.onrender.com/ssl-payment-notification`,
+            }))
           : (data = {
               total_amount: 1000 || req.params.am,
               currency: "BDT",
@@ -542,6 +603,12 @@ client.connect((err) => {
         return res
           .status(200)
           .redirect("https://sasthoseba.netlify.app/payment-success");
+      });
+
+      app.post("/amb-payment-success", async (req, res) => {
+        return res
+          .status(200)
+          .redirect("http://localhost:4000/amb-payment-success");
       });
 
       app.post("/ssl-payment-success-doc/:id", async (req, res) => {

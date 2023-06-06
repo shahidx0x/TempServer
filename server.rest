@@ -3,8 +3,12 @@ GET https://api-sastho-seba.onrender.com/carts
 DELETE https://api-sastho-seba.onrender.com/carts/delete/all
 ###
 GET https://api-sastho-seba.onrender.com/users-info
+
 ###
 delete https://api-sastho-seba.onrender.com/doctorlist/delete/all
 
 ###
-get https://meet.google.com/new
+PUT https://api-sastho-seba.onrender.com/users/admn.sasthoseba@gmail.com
+
+###
+delete http://localhost:4000/am/delete/all
