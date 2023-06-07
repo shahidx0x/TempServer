@@ -608,7 +608,7 @@ client.connect((err) => {
       app.post("/amb-payment-success", async (req, res) => {
         return res
           .status(200)
-          .redirect("http://localhost:4000/amb-payment-success");
+          .redirect("https://sasthoseba.netlify.app/amb-payment-success");
       });
 
       app.post("/ssl-payment-success-doc/:id", async (req, res) => {
